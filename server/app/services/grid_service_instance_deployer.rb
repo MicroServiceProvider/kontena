@@ -27,7 +27,8 @@ class GridServiceInstanceDeployer
   rescue => exc
     error "failed to deploy service instance #{self.grid_service.to_path}-#{instance_number} to node #{node.name}"
     error exc.message
-    error exc.backtrace.join("\n")
+    error exc.backtrace.join("\n") if exc.backtrace
+    log_service_event("service #{self.grid_service.to_path} (instance #{instance_number}) deploy failed to node #{node.name}: #{exc.message}", node)
     false
   end
 
@@ -80,6 +81,20 @@ class GridServiceInstanceDeployer
   # @param [HostNode] node
   def notify_node(node)
     rpc_client = RpcClient.new(node.node_id, 2)
-    rpc_client.request('/service_pods/notify_update', [])
+    rpc_client.notify('/service_pods/notify_update', [])
+  end
+
+  # @param [String] msg
+  # @param [HostNode] node
+  # @param [Integer] severity
+  def log_service_event(msg, node, severity = EventLog::INFO)
+    EventLog.create(
+      host_node_id: node.id,
+      grid_id: @grid_service.grid_id,
+      grid_service_id: @grid_service.id,
+      reason: 'service:instance_deploy',
+      severity: severity,
+      msg: msg
+    )
   end
 end
