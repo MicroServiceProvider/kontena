@@ -9,6 +9,7 @@ class Volume
   field :external, type: Boolean
 
   belongs_to :grid
+  has_many :event_logs
 
   index({ grid_id: 1 })
   index({ name: 1 })
