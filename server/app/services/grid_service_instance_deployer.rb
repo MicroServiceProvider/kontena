@@ -28,7 +28,10 @@ class GridServiceInstanceDeployer
     error "failed to deploy service instance #{self.grid_service.to_path}-#{instance_number} to node #{node.name}"
     error exc.message
     error exc.backtrace.join("\n") if exc.backtrace
-    log_service_event("service #{self.grid_service.to_path} (instance #{instance_number}) deploy failed to node #{node.name}: #{exc.message}", node)
+    log_service_event(
+      "service #{self.grid_service.to_path} (instance #{instance_number}) deploy failed to node #{node.name}: #{exc.message}",
+      node, EventLog::ERROR
+    )
     false
   end
 
